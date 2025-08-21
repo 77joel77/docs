@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Beverly — 个人站</title>
+  <meta name="description" content="Beverly 的个人主页：关于我、作品、技能、订阅与预约。" />
+  <!-- 基本安全头（文件本地打开也有效于后续部署） -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' data: blob:; img-src 'self' data: blob:; media-src 'self' data: blob:; form-action 'self' https://formspree.io https://api.web3forms.com; base-uri 'self'; object-src 'none'">
+  <meta name="referrer" content="no-referrer" />
+  <style>
+    :root{
+      --bg: #ffffff;
+      --text: #222;
+      --muted:#666;
+      --card:#f6f7f9;
+      --accent:#7c3aed; /* 紫色 */
+      --accent-2:#22c55e; /* 绿色 */
+      --ring: rgba(124,58,237,.4);
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 14px;
+    }
+    /* 深色（跟随系统） */
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0f1220;
+        --text:#e6e6e6;
+        --muted:#9aa0a6;
+        --card:#151935;
+        --accent:#a78bfa;
+        --accent-2:#34d399;
+        --ring: rgba(167,139,250,.5);
+        --shadow: 0 10px 30px rgba(0,0,0,.35);
+      }
+    }
+    /* 三种风格：minimal / colorful / matte（暗哑色）*/
+    html[data-theme="minimal"]{
+      --card:#f4f5f7;
+      --accent:#4f46e5;
+      --accent-2:#06b6d4;
+    }
+    html[data-theme="colorful"]{
+      --card:#fff5f7;
+      --accent:#f43f5e;
+      --accent-2:#22c55e;
+    }
+    html[data-theme="matte"]{
+      --bg:#0d0f14;
+      --text:#e8e8ea;
+      --muted:#9a9a9f;
+      --card:#141821;
+      --accent:#7dd3fc;   /* 柔和蓝 */
+      --accent-2:#f5d0fe; /* 柔和粉紫 */
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family: ui-serif, Georgia, "Times New Roman", STSong, "Hiragino Mincho ProN", "Songti SC", serif; line-height:1.6}
+    /* 华丽感：标题用衬线 + 轻微字距 */
+    h1,h2,h3{font-weight:700;letter-spacing:.5px; margin:0 0 .6rem}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{max-width:1100px;margin:0 auto;padding:28px}
+    header{
+      display:flex;align-items:center;gap:18px;justify-content:space-between;margin-bottom:22px;
+    }
+    .brand{display:flex;align-items:center;gap:14px}
+    .avatar{width:64px;height:64px;border-radius:50%;box-shadow:var(--shadow);background:var(--card);display:grid;place-items:center;border:2px solid rgba(0,0,0,.05)}
+    /* 卡片 */
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .grid{display:grid;gap:18px}
+    .grid-2{grid-template-columns:repeat(2,1fr)}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    @media (max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+    /* 多彩背景（开启于 colorful 风格） */
+    .blobs{
+      position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.25;filter:blur(40px);
+      display:none;
+    }
+    html[data-theme="colorful"] .blobs{display:block}
+    .blob{position:absolute;border-radius:999px;mix-blend-mode:multiply;transform:translate(-50%,-50%) scale(1);animation:float 14s ease-in-out infinite}
+    .blob.b1{left:20%;top:20%;width:360px;height:360px;background:#fca5a5}
+    .blob.b2{left:70%;top:30%;width:420px;height:420px;background:#93c5fd;animation-duration:18s}
+    .blob.b3{left:40%;top:70%;width:380px;height:380px;background:#a7f3d0;animation-duration:22s}
+    @keyframes float{
+      0%,100%{transform:translate(-50%,-50%) scale(1)}
+      50%{transform:translate(-50%,-55%) scale(1.08)}
+    }
+    /* 导航 */
+    nav{display:flex;gap:10px;flex-wrap:wrap}
+    nav a{padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.04)}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    select,button,.input,textarea{
+      background:#fff;color:#111;border:1px solid #d0d5dd;border-radius:12px;padding:10px 12px;font-size:14px;
+      outline:none;box-shadow:0 0 0 0 transparent;transition:box-shadow .15s ease, transform .04s ease;
+    }
+    html[data-theme="matte"] select, html[data-theme="matte"] .input, html[data-theme="matte"] textarea, html[data-theme="matte"] button{
+      background:#0f1320;color:var(--text);border-color:#263042;
+    }
+    .input:focus, textarea:focus, select:focus{box-shadow:0 0 0 4px var(--ring)}
+    button{cursor:pointer}
+    /* 徽章/小标签 */
+    .badge{display:inline-block;background:rgba(0,0,0,.06);padding:4px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
+    /* 作品卡片 */
+    .work{display:flex;flex-direction:column;gap:10px}
+    .work .media{aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+    .work video,.work img{width:100%;height:100%;object-fit:cover;display:block}
+    /* 表单提示 */
+    .hint{font-size:12px;color:var(--muted)}
+    /* 页脚 */
+    footer{margin-top:28px;padding:18px 0;color:var(--muted);font-size:14px}
+    /* 小型“验证码” */
+    .captcha{display:flex;align-items:center;gap:8px}
+    .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+  <!-- 多彩背景（仅在 colorful 主题显示） -->
+  <div class="blobs">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="brand">
+        <!-- Inline SVG 头像：可爱小女孩（可随时替换为你自己的图像） -->
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 120 120" width="56" height="56" role="img" aria-label="Beverly avatar">
+            <defs>
+              <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#fbcfe8"/>
+                <stop offset="1" stop-color="#a5b4fc"/>
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="56" fill="url(#g)"/>
+            <!-- 头发 -->
+            <path d="M22,56c0-22,16-34,38-34s38,12,38,34c0,14-8,12-8,12s-6-20-30-20-30,20-30,20-8,2-8-12z" fill="#3b2f2f"/>
+            <!-- 脸 -->
+            <circle cx="60" cy="66" r="24" fill="#fde7d9"/>
+            <!-- 眉眼 -->
+            <path d="M48 64 q4 -4 8 0M64 64 q4 -4 8 0" stroke="#2a2a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <circle cx="52" cy="70" r="3" fill="#2a2a2a"/>
+            <circle cx="68" cy="70" r="3" fill="#2a2a2a"/>
+            <!-- 微笑 -->
+            <path d="M52 80 q8 8 16 0" stroke="#e11d48" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- 发饰 -->
+            <circle cx="86" cy="50" r="6" fill="#f43f5e"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Beverly</h1>
+          <div class="badge">喜欢花样滑冰 · 分享 & 展示作品 · 接受预约</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <!-- 主题切换：minimal / colorful / matte -->
+        <label class="sr-only" for="themePicker">主题</label>
+        <select id="themePicker" title="选择风格">
+          <option value="minimal">极简</option>
+          <option value="colorful" selected>多彩</option>
+          <option value="matte">深色·哑光</option>
+        </select>
+        <!-- 深色模式开关（在每种主题下都能切暗/亮） -->
+        <button id="darkToggle" aria-pressed="false" title="深色模式切换">🌓 深色模式</button>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#about">关于我</a>
+      <a href="#works">作品</a>
+      <a href="#skills">技能</a>
+      <a href="#contact">联系 / 订阅 / 预约</a>
+    </nav>
+
+    <!-- 关于我 -->
+    <section id="about" class="card" style="margin-top:16px">
+      <h2>关于我</h2>
+      <p>嗨，我是 <strong>Beverly</strong> 。我热爱 <strong>花样滑冰</strong>，也喜欢把灵感做成作品分享给大家。这里是我的小天地：你可以浏览我的视频、图像作品，也可以订阅更新或直接预约（Book me）。</p>
+      <p class="hint">想换头像？把上面的 SVG 换成你的图片：用 <code>&lt;img src="data:image/png;base64,..."&gt;</code> 的 <em>data URI</em> 嵌入即可，仍然是单文件。</p>
+    </section>
+
+    <!-- 作品列表：图片或视频都可以 -->
+    <section id="works" class="grid grid-3" style="margin-top:16px">
+      <!-- 作品卡片示例 1（视频） -->
+      <article class="card work">
+        <div class="media">
+          <!-- 将 src 替换为你的 MP4（也可以 data:video/mp4;base64,...） -->
+          <video controls preload="metadata" poster="" aria-label="训练滑步集锦">
+            <source src="" type="video/mp4" />
+          </video>
+        </div>
+        <h3>训练滑步集锦</h3>
+        <p class="hint">把 <code>&lt;source src=""&gt;</code> 换成你的视频文件路径或 data URI。</p>
+      </article>
+
+      <!-- 作品卡片示例 2（图片） -->
+      <article class="card work">
+        <div class="media">
+          <!-- 占位渐变图：可换成 <img src="data:image/jpeg;base64,..."> -->
+          <img alt="冰面光影练习" src="data:image/svg+xml;utf8,<?xml version='1.0'?><svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'><defs><linearGradient id='g' x1='0' x2='1'><stop offset='0' stop-color='%23a5b4fc'/><stop offset='1' stop-color='%23fbcfe8'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/></svg>">
+        </div>
+        <h3>冰面光影</h3>
+        <p class="hint">替换为你的作品截图或图片。</p>
+      </article>
+
+      <!-- 作品卡片示例 3（视频） -->
+      <article class="card work">
+        <div class="media">
+          <video controls preload="metadata" aria-label="编舞片段">
+            <source src="" type="video/mp4" />
+          </video>
+        </div>
+        <h3>编舞片段</h3>
+        <p class="hint">支持 MP4 / WebM，本页离线可看。</p>
+      </article>
+    </section>
+
+    <!-- 技能 -->
+    <section id="skills" class="card" style="margin-top:16px">
+      <h2>技能</h2>
+      <ul>
+        <li>花样滑冰：基础步法、旋转、简单跳跃组合</li>
+        <li>创作与展示：短视频剪辑、舞台表演片段整理</li>
+        <li>社群分享：内容更新、活动筹备、合作沟通</li>
+      </ul>
+    </section>
+
+    <!-- 联系、订阅、预约 -->
+    <section id="contact" class="grid grid-2" style="margin-top:16px">
+      <!-- 联系方式 -->
+      <div class="card">
+        <h2>联系我</h2>
+        <p>欢迎邮件或短信联系，我会尽快回复。</p>
+        <form id="contactForm">
+          <div style="display:grid;gap:10px">
+            <input class="input" type="text" name="name" placeholder="你的称呼" required aria-label="你的称呼">
+            <input class="input" type="email" name="email" placeholder="你的邮箱" required aria-label="你的邮箱">
+            <input class="input" type="tel" name="phone" placeholder="你的手机（可选）" aria-label="你的手机">
+            <textarea class="input" name="msg" rows="4" placeholder="留言…" required aria-label="留言"></textarea>
+            <!-- 轻量防垃圾（验证码 + 蜜罐） -->
+            <div class="captcha">
+              <label>3 + 4 = </label>
+              <input class="input" style="width:90px" type="number" inputmode="numeric" name="c" required aria-label="验证码">
+              <input class="sr-only" type="text" name="hp" tabindex="-1" autocomplete="off">
+            </div>
+            <div class="hint">表单默认用 <code>mailto:</code> 发送（保持单文件离线可用）。想接到第三方（如 Formspree/Web3Forms）见页面底部说明。</div>
+            <button type="submit">✉️ 发送到邮箱</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 订阅 & 预约 -->
+      <div class="card">
+        <h2>订阅更新 & 预约（Book me）</h2>
+        <form id="subForm" style="margin-bottom:16px">
+          <div style="display:grid;gap:10px">
+            <input class="input" type="email" name="subEmail" placeholder="你的邮箱（订阅）" required aria-label="订阅邮箱">
+            <button type="submit">🔔 订阅</button>
+            <div class="hint">离线模式下会将邮箱保存在你的浏览器 LocalStorage；如需真正邮件推送，可按下方说明接第三方服务。</div>
+          </div>
+        </form>
+
+        <form id="bookForm">
+          <div style="display:grid;gap:10px">
+            <input class="input" type="text" name="bname" placeholder="你的称呼" required aria-label="称呼">
+            <input class="input" type="email" name="bemail" placeholder="你的邮箱" required aria-label="邮箱">
+            <input class="input" type="text" name="btype" placeholder="预约类型（如：拍摄/合作/演出）" required aria-label="预约类型">
+            <input class="input" type="date" name="bdate" aria-label="日期">
+            <textarea class="input" name="bmsg" rows="3" placeholder="补充说明…" aria-label="补充说明"></textarea>
+            <div class="captcha">
+              <label>5 + 6 = </label>
+              <input class="input" style="width:90px" type="number" inputmode="numeric" name="bc" required aria-label="验证码">
+            </div>
+            <button type="submit">📅 发送预约请求</button>
+            <div class="hint">本页将生成一封预约邮件草稿给 Beverly（保持单文件）；你也可以启用第三方表单来收集。</div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <footer>
+      <div>© <span id="y"></span> Beverly. 保留所有权利。</div>
+      <div class="hint">安全提示：本页启用了基本 CSP、no-referrer、外链 <code>rel="noopener"</code> 等前端防护。若部署到生产，请配合 HTTPS、域名 HSTS、后端速率限制与验证码服务。</div>
+    </footer>
+  </div>
+
+  <script>
+    // —— 主题与深色模式 —— //
+    const themePicker = document.getElementById('themePicker');
+    const darkBtn = document.getElementById('darkToggle');
+
+    const savedTheme = localStorage.getItem('theme') || 'colorful';
+    const savedDark  = localStorage.getItem('dark') || 'auto';
+
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themePicker.value = savedTheme;
+
+    // 深色：auto / light / dark（三态）
+    function applyDark(mode){
+      if(mode==='dark'){ document.documentElement.style.colorScheme='dark'; document.body.dataset.dark='dark'; darkBtn.setAttribute('aria-pressed','true'); }
+      else if(mode==='light'){ document.documentElement.style.colorScheme='light'; document.body.dataset.dark='light'; darkBtn.setAttribute('aria-pressed','false'); }
+      else { document.documentElement.style.colorScheme='normal'; delete document.body.dataset.dark; darkBtn.setAttribute('aria-pressed','false'); }
+      localStorage.setItem('dark', mode);
+      darkBtn.textContent = (mode==='dark'?'🌙 已深色':'🌓 深色模式');
+    }
+
+    // 初始根据 savedDark 应用
+    applyDark(savedDark);
+
+    themePicker.addEventListener('change', (e)=>{
+      document.documentElement.setAttribute('data-theme', e.target.value);
+      localStorage.setItem('theme', e.target.value);
+    });
+
+    darkBtn.addEventListener('click', ()=>{
+      const curr = localStorage.getItem('dark') || 'auto';
+      const next = curr==='auto' ? 'dark' : (curr==='dark' ? 'light' : 'auto');
+      applyDark(next);
+    });
+
+    // 年份
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // —— 联系表单（mailto + 基本校验 + 轻量防垃圾） —— //
+    const contactForm = document.getElementById('contactForm');
+    contactForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(contactForm);
+      // 蜜罐拦截
+      if(fd.get('hp')) return alert('提交已拦截。');
+      if(fd.get('c') !== '7') return alert('请完成简单验证题。');
+
+      // 发送到你的邮箱：请把下方 email 替换为你的真实邮箱
+      const to = 'beverly@example.com'; // ← 修改成你的邮箱
+      const subject = encodeURIComponent('网站联系 — 来自 ' + fd.get('name'));
+      const body = encodeURIComponent(
+        `称呼：${fd.get('name')}\n邮箱：${fd.get('email')}\n手机：${fd.get('phone')||'-'}\n\n留言：\n${fd.get('msg')}`
+      );
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    // —— 订阅（LocalStorage 演示） —— //
+    const subForm = document.getElementById('subForm');
+    subForm
